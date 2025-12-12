@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vèdánth Pořtfôliô</title>
+    <meta name="description" content="Vedanth | Full Stack Developer & IoT Specialist.">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@300;500;700&family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <link id="favicon" rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💻</text></svg>">
+    <style>
+        :root {
+            --neon-main: #0aff00; 
+            --neon-dim: #003b00;
+            --dark-bg: #050505;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: #e0e0e0;
+            font-family: 'Fira Code', monospace;
+            margin: 0;
+            overflow-x: hidden;
+            cursor: crosshair;
+        }
+
+        ::selection {
+            background: var(--neon-main);
+            color: #000;
+        }
+
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .loader-text { color: var(--neon-main); margin-bottom: 20px; font-size: 1.2rem; }
+        
+        .progress-bar-container {
+            width: 300px;
+            height: 4px;
+            background: #111;
+            border: 1px solid var(--neon-main);
+        }
+        
+        .progress-bar-fill {
+            height: 100%;
+            background: var(--neon-main);
+            width: 0%;
+            transition: width 0.5s;
+            box-shadow: 0 0 10px var(--neon-main);
+        }
+
+        .scanline {
+            width: 100%;
+            height: 100px;
+            z-index: 10;
+            background: linear-gradient(0deg, rgba(0,0,0,0) 0%, rgba(10, 255, 0, 0.1) 50%, rgba(0,0,0,0) 100%);
+            opacity: 0.1;
+            position: fixed;
+            bottom: 100%;
+            left: 0;
+            pointer-events: none;
+            animation: scanline 10s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { bottom: 100%; }
+            100% { bottom: -100px; }
+        }
+
+        #matrixCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -1;
+        }
+
+        .glass-panel {
+            background: rgba(0, 20, 0, 0.2); 
+            backdrop-filter: blur(4px); 
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(10, 255, 0, 0.3);
+            border-radius: 8px;
+            padding: 30px;
+            height: 100%;
+            transition: 0.4s ease-out;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+            animation: borderPulse 4s infinite alternate;
+        }
+        
+        @keyframes borderPulse {
+            0% { border-color: rgba(10, 255, 0, 0.3); box-shadow: 0 0 5px rgba(10, 255, 0, 0.1); }
+            100% { border-color: rgba(10, 255, 0, 0.8); box-shadow: 0 0 20px rgba(10, 255, 0, 0.2); }
+        }
+
+        .glass-panel:hover {
+            background: rgba(0, 30, 0, 0.4);
+            transform: translateY(-5px) scale(1.02);
+            border-color: var(--neon-main);
+            box-shadow: 0 0 30px rgba(10, 255, 0, 0.3);
+        }
+
+        .reveal {
+            position: relative;
+            transform: translateY(50px);
+            opacity: 0;
+            transition: 1s all ease;
+        }
+        
+        .reveal.active {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .glitch-text {
+            position: relative;
+            animation: glitch 3s infinite;
+        }
+
+        @keyframes glitch {
+            0% { text-shadow: 0 0 0px var(--neon-main); }
+            95% { text-shadow: 0 0 0px var(--neon-main); transform: translate(0); }
+            96% { text-shadow: -2px 0 red, 2px 0 blue; transform: translate(-2px, 1px); }
+            97% { text-shadow: 2px 0 red, -2px 0 blue; transform: translate(2px, -1px); }
+            98% { text-shadow: 0 0 0px var(--neon-main); transform: translate(0); }
+        }
+
+        .typing-effect {
+            overflow: hidden;
+            border-right: .15em solid var(--neon-main);
+            white-space: nowrap;
+            margin: 0 auto;
+            letter-spacing: .15em;
+            animation: typing 3.5s steps(40, end), blink-caret .75s step-end infinite;
+        }
+
+        @keyframes typing { from { width: 0 } to { width: 100% } }
+        @keyframes blink-caret { from, to { border-color: transparent } 50% { border-color: var(--neon-main); } }
+
+        .section-container {
+            position: relative;
+            z-index: 1;
+            padding: 100px 0;
+        }
+
+        .navbar {
+            background: rgba(0, 10, 0, 0.8);
+            border-bottom: 1px solid var(--neon-main);
+            backdrop-filter: blur(5px);
+        }
+        
+        .navbar-brand {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--neon-main) !important;
+            letter-spacing: 2px;
+        }
+
+        .nav-link { color: #fff !important; transition: 0.3s; }
+        .nav-link:hover { color: var(--neon-main) !important; text-shadow: 0 0 10px var(--neon-main); }
+
+        h1, h2, h3, h4, h5 { font-family: 'Orbitron', sans-serif; }
+        .text-neon { color: var(--neon-main); }
+
+        .tech-badge {
+            display: inline-block;
+            border: 1px solid var(--neon-main);
+            color: var(--neon-main);
+            padding: 5px 12px;
+            margin: 6px;
+            font-size: 0.85rem;
+            transition: 0.3s;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        .tech-badge:nth-child(even) { animation-duration: 4s; }
+        
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-5px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .tech-badge:hover {
+            background: var(--neon-main);
+            color: black;
+            box-shadow: 0 0 10px var(--neon-main);
+        }
+
+        .btn-cyber {
+            display: inline-block;
+            border: 1px solid var(--neon-main);
+            color: var(--neon-main);
+            background: transparent;
+            padding: 10px 25px;
+            text-decoration: none;
+            text-transform: uppercase;
+            margin-top: 15px;
+            transition: 0.3s;
+        }
+        
+        .btn-cyber:hover {
+            background: var(--neon-main);
+            color: black;
+            box-shadow: 0 0 25px var(--neon-main);
+        }
+
+        ::-webkit-scrollbar { width: 10px; }
+        ::-webkit-scrollbar-track { background: #000; border-left: 1px solid #333; }
+        ::-webkit-scrollbar-thumb { background: #003b00; border: 1px solid var(--neon-main); }
+        ::-webkit-scrollbar-thumb:hover { background: var(--neon-main); box-shadow: 0 0 10px var(--neon-main); }
+
+        #sys-monitor {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 10, 0, 0.8);
+            border: 1px solid var(--neon-main);
+            padding: 10px;
+            font-size: 0.75rem;
+            font-family: 'Fira Code', monospace;
+            color: #aaa;
+            z-index: 1000;
+            backdrop-filter: blur(2px);
+            width: 120px;
+        }
+        
+        .mon-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 2px;
+        }
+        
+        .spec-row {
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid rgba(10, 255, 0, 0.2);
+            padding: 8px 0;
+            font-size: 0.9rem;
+        }
+        .spec-label { color: #888; }
+        .spec-val { color: var(--neon-main); text-align: right; }
+        
+        .cyber-tab {
+            background: transparent !important;
+            color: #888 !important;
+            border: none !important;
+            border-right: 1px solid #333 !important;
+            border-radius: 0 !important;
+            font-family: 'Fira Code', monospace;
+            transition: 0.3s;
+        }
+
+        .cyber-tab:hover {
+            color: #fff !important;
+            background: rgba(255, 255, 255, 0.05) !important;
+        }
+
+        .cyber-tab.active {
+            color: var(--neon-main) !important;
+            background: rgba(10, 255, 0, 0.1) !important;
+            border-bottom: 2px solid var(--neon-main) !important;
+        }
+
+        .cyber-image-container {
+            position: relative;
+            border: 1px solid var(--neon-main);
+        }
+
+        .cyber-image-container img {
+            filter: contrast(1.1) grayscale(30%);
+        }
+
+        .img-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            color: var(--neon-main);
+            font-family: 'Fira Code', monospace;
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-top: 1px solid var(--neon-main);
+        }
+
+        .footer-terminal {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 10px 15px;
+            display: inline-block;
+        }
+
+        .terminal-input {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-family: 'Fira Code', monospace;
+            width: 200px;
+            font-weight: normal;
+        }
+
+        .terminal-input::placeholder {
+            color: rgba(255, 255, 255, 0.3); 
+            font-style: italic;
+        }
+
+        .prompt-text {
+            color: var(--neon-main);
+            font-weight: bold;
+            margin-right: 5px;
+        }
+
+        .blink { animation: blinker 1s linear infinite; }
+        @keyframes blinker { 50% { opacity: 0; } }
+
+        .barrel-roll { animation: spinPage 2s ease-in-out; }
+        @keyframes spinPage { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        a, button, .nav-link, .tech-card, .glass-panel { cursor: alias; }
+    </style>
+</head>
+<body>
+
+    <div id="preloader">
+        <div class="loader-text">INITIALIZING SYSTEM...</div>
+        <div class="progress-bar-container">
+            <div class="progress-bar-fill" id="progress"></div>
+        </div>
+    </div>
+
+    <div class="scanline"></div>
+    <canvas id="matrixCanvas"></canvas>
+
+    <nav class="navbar navbar-expand-lg fixed-top navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand hacker-text" data-value="<VEDANTH />" href="#">&lt;VEDANTH /&gt;</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse justify-content-end pe-4" id="navbarNav">
+                <ul class="navbar-nav">
+                    <li class="nav-item"><a class="nav-link hacker-text" data-value="01_HOME" href="#home">01_HOME</a></li>
+                    <li class="nav-item"><a class="nav-link hacker-text" data-value="02_ABOUT" href="#about">02_ABOUT</a></li>
+                    <li class="nav-item"><a class="nav-link hacker-text" data-value="03_SKILLS" href="#skills">03_SKILLS</a></li>
+                    <li class="nav-item"><a class="nav-link hacker-text" data-value="04_PROJECTS" href="#projects">04_PROJECTS</a></li>
+                    <li class="nav-item"><a class="nav-link hacker-text" data-value="05_CONTACT" href="#contact">05_CONTACT</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+            <button onclick="setTheme('#0aff00')" class="btn btn-sm border-success text-success" style="width: 20px; height: 20px; background:#0aff00;"></button>
+            <button onclick="setTheme('#00f3ff')" class="btn btn-sm border-info text-info" style="width: 20px; height: 20px; background:#00f3ff;"></button>
+            <button onclick="setTheme('#ff0055')" class="btn btn-sm border-danger text-danger" style="width: 20px; height: 20px; background:#ff0055;"></button>
+        </div>
+    </nav>
+
+    <section id="home" class="section-container d-flex align-items-center" style="min-height: 100vh;">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-lg-8 col-xl-7 text-white">
+                    <div class="glass-panel text-center">
+                        <div class="d-inline-block">
+                            <h5 class="text-neon typing-effect" style="letter-spacing: 3px;">:: SYSTEM_READY ::</h5>
+                        </div>
+                        <h1 class="display-2 fw-bold mb-3 glitch-text hacker-text" data-value="HELLO WORLD">HELLO WORLD</h1>
+                       <p class="lead" style="line-height: 1.8;">
+                        I'm <span class="text-neon fw-bold hacker-text" data-value="VEDANTH">VEDANTH</span>.
+                        A developer executing logic in <span class="text-neon">Java, Python, and C++</span>.
+                        <br><br>
+                        I view technology as a boundless interface. Traversing the stack from <span class="text-decoration-underline">web apps</span> 
+                        to <span class="text-decoration-underline">embedded systems</span>, I reverse-engineer complex problems to deploy efficient solutions.
+                    </p>
+                        <a href="#projects" class="btn-cyber">Initialise_Projects</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="about" class="section-container reveal">
+        <div class="container">
+            <h2 class="mb-5 border-bottom border-success d-inline-block pe-5 text-neon hacker-text" data-value="> whoami.txt"> > whoami.txt</h2>
+            <div class="row justify-content-center">
+                <div class="col-lg-10">
+                    <div class="glass-panel">
+                        <div class="row align-items-center">
+                            <div class="col-md-7 mb-4 mb-md-0">
+                                <h4 class="text-white mb-3 hacker-text" data-value="PROFILE_SUMMARY">PROFILE_SUMMARY</h4>
+                                <p class="text-white mb-3">
+                                    I’m a Computer Science Engineering student with a growing passion for Web Development, Robotics, and CyberSecurity. What drives me is curiosity — the excitement of exploring how technology can be used to solve real-world problems.
+                                </p>
+                                <p class="text-white">
+                                    I enjoy working on web development because it gives me the chance to build applications that are not just functional but also engaging and user-friendly. The idea of turning ideas into something people can actually use motivates me to keep learning.
+                                </p>
+                            </div>
+                            <div class="col-md-5">
+                                <div class="p-3 border border-success bg-black bg-opacity-25 rounded">
+                                    <h6 class="text-neon mb-3 border-bottom border-secondary pb-2">SYSTEM_SPECS</h6>
+                                    <div class="spec-row">
+                                        <span class="spec-label">ROLE:</span>
+                                        <span class="spec-val hacker-text" data-value="CSE_STUDENT">CSE_STUDENT</span>
+                                    </div>
+                                    <div class="spec-row">
+                                        <span class="spec-label">BASE:</span>
+                                        <span class="spec-val hacker-text" data-value="BENGALURU_IN">BENGALURU_IN</span>
+                                    </div>
+                                    <div class="spec-row">
+                                        <span class="spec-label">FOCUS:</span>
+                                        <span class="spec-val hacker-text" data-value="IOT_&_WEB">IOT_&_WEB</span>
+                                    </div>
+                                    <div class="spec-row">
+                                        <span class="spec-label">STATUS:</span>
+                                        <span class="spec-val text-neon blinking">AVAILABLE</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="skills" class="section-container reveal">
+        <div class="container">
+            <h2 class="mb-5 border-bottom border-success d-inline-block pe-5 text-neon hacker-text" data-value="> execute_skills.exe"> > execute_skills.exe</h2>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="glass-panel">
+                        <h4 class="text-neon mb-3 hacker-text" data-value="LANGUAGES">LANGUAGES</h4>
+                        <div>
+                            <span class="tech-badge hacker-text" data-value="Python">Python</span>
+                            <span class="tech-badge hacker-text" data-value="Java">Java</span>
+                            <span class="tech-badge hacker-text" data-value="C++">C++</span>
+                            <span class="tech-badge hacker-text" data-value="HTML">HTML</span>
+                            <span class="tech-badge hacker-text" data-value="JavaScript">JavaScript</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="glass-panel">
+                        <h4 class="text-neon mb-3 hacker-text" data-value="TOOLS & FRAMEWORKS">TOOLS & FRAMEWORKS</h4>
+                        <div>
+                            <span class="tech-badge hacker-text" data-value="MATLAB">MATLAB</span>
+                            <span class="tech-badge hacker-text" data-value="Arduino">Arduino</span>
+                            <span class="tech-badge hacker-text" data-value="SQL">SQL</span>
+                            <span class="tech-badge hacker-text" data-value="Bootstrap">Bootstrap</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects" class="section-container reveal">
+        <div class="container">
+            <h2 class="mb-5 border-bottom border-success d-inline-block pe-5 text-neon hacker-text" data-value="> access_projects_db"> > access_projects_db</h2>
+            <div class="row g-4">
+                
+                <div class="col-md-6">
+                    <div class="glass-panel">
+                        <h4 class="text-white hacker-text" data-value="YT Video End Time">YT Video End Time</h4>
+                        <p class="text-muted small hacker-text" data-value="ID: CHROME_EXT_001">ID: CHROME_EXT_001</p>
+                        <p>A Chrome extension which helps you get the exact time of completion for the current video playing.</p>
+                        <a href="https://github.com/triksoft/Youtube-End-Time-Estimator" class="btn-cyber btn-sm">Access Extension</a>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="glass-panel">
+                        <h4 class="text-white hacker-text" data-value="Edvance Website">Edvance Website</h4>
+                        <p class="text-muted small hacker-text" data-value="ID: WEB_EDVANCE_002">ID: WEB_EDVANCE_002</p>
+                        <p>A full-stack educational website platform built to help students track progress.</p>
+                        <a href="https://github.com/triksoft/Edvance" class="btn-cyber btn-sm">Get Website Code</a>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="glass-panel">
+                        <h4 class="text-white hacker-text" data-value="Personal Website">Personal Website</h4>
+                        <p class="text-muted small hacker-text" data-value="ID: PORTFOLIO_V1">ID: PORTFOLIO_V1</p>
+                        <p>This is my personal space in the Internet where I document the projects, skills learnt and also tools I use.</p>
+                        <a href="#" class="btn-cyber btn-sm">View Source</a>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="glass-panel">
+                        <h4 class="text-white hacker-text" data-value="Medical Box Dispenser">Medical Box Dispenser</h4>
+                        <p class="text-muted small hacker-text" data-value="ID: IOT_ARDUINO_003">ID: IOT_ARDUINO_003</p>
+                        <p>An Arduino-based IoT solution for automated medicine dispensing for elderly care.</p>
+                        <button class="btn-cyber btn-sm" data-bs-toggle="modal" data-bs-target="#projectLogModal">
+                            OPEN_SYSTEM_LOG
+                        </button>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="glass-panel" style="border-color: var(--neon-main);">
+                        <h4 class="text-white hacker-text" data-value="Mind App (Mobile)">Mind App (Mobile)</h4>
+                        <p class="text-muted small hacker-text" data-value="ID: PKG_ANDROID_APK">ID: PKG_ANDROID_APK</p>
+                        <p>Native mobile application available for direct installation.</p>
+                        <a href="https://github.com/triksoft/MindLock" class="btn-cyber btn-sm">Access App</a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="section-container reveal">
+        <div class="container pt-5">
+            <div class="row justify-content-center">
+                <div class="col-lg-8">
+                    <div class="glass-panel text-center">
+                        <h2 class="display-4 mb-4 text-neon hacker-text" data-value="PING_HOST?">PING_HOST?</h2>
+                        <p class="lead mb-5">I am currently open to new opportunities.</p>
+                        
+                        <a href="mailto:s.m.vedanth14@gmail.com" class="btn-cyber btn-lg px-5">
+                            SEND_EMAIL_PACKET
+                        </a>
+
+                        <div class="mt-5 d-flex justify-content-center gap-4">
+                            <a href="https://www.linkedin.com/in/smvedanth/" class="text-white fs-2"><i class="bi bi-linkedin"></i></a>
+                            <a href="https://github.com/triksoft" class="text-white fs-2"><i class="bi bi-github"></i></a>
+                        </div>
+                        
+                        <div class="mt-5 pt-4 border-top border-secondary">
+                             <div class="footer-terminal">
+                                <span class="prompt-text">root@vedanth:~#</span>
+                                <input type="text" class="terminal-input" placeholder="type 'help' to start...">
+                                <span class="text-neon blink">_</span>
+                            </div>
+                            
+                            <div class="mt-3 text-neon small">
+                                SYSTEM STATUS: ONLINE <br>
+                                © 2026 VEDANTH
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div id="sys-monitor">
+        <div class="mon-row">
+            <span>CPU:</span> <span id="cpu-val">12</span>%
+        </div>
+        <div class="mon-row">
+            <span>RAM:</span> <span id="ram-val">402</span> MB
+        </div>
+        <div class="mon-row">
+            <span>NET:</span> <span id="net-val" class="text-neon">ONLINE</span>
+        </div>
+    </div>
+
+    <div id="bsod" onclick="document.getElementById('bsod').style.display='none'" style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:#0000aa; color:white; z-index:999999; padding:10%; font-family: 'Courier New', monospace; cursor:none;">
+        <h1 style="background:white; color:#0000aa; display:inline-block; padding:0 5px; font-size: 1.5rem;">Windows</h1>
+        <p class="mt-4">A fatal exception 0E has occurred at 0028:C0011E36. The current application will be terminated.</p>
+        <p class="mt-3">* Press any key to terminate the current application.</p>
+        <p>* Press CTRL+ALT+DEL again to restart your computer. You will lose any unsaved information in all applications.</p>
+        <br>
+        <p>Press any key to continue <span class="blink">_</span></p>
+    </div>
+
+    <div class="modal fade" id="projectLogModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content glass-panel p-0" style="border: 1px solid var(--neon-main); background: rgba(5, 5, 5, 0.95);">
+                
+                <div class="modal-header border-bottom border-success" style="background: rgba(0, 20, 0, 0.8);">
+                    <h5 class="modal-title text-neon" style="font-family: 'Fira Code'">
+                        <i class="bi bi-cpu me-2"></i>PROJECT: MED_BOX_DISPENSER
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body p-0">
+                    <ul class="nav nav-tabs border-success" id="myTab" role="tablist" style="background: rgba(0,0,0,0.5);">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active cyber-tab" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs-pane" type="button">
+                                <i class="bi bi-file-text me-2"></i>SYSTEM_LOGS
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link cyber-tab" id="visuals-tab" data-bs-toggle="tab" data-bs-target="#visuals-pane" type="button">
+                                <i class="bi bi-images me-2"></i>SCHEMATICS_&_VISUALS
+                            </button>
+                        </li>
+                    </ul>
+
+                    <div class="tab-content p-4" id="myTabContent" style="min-height: 400px;">
+                        
+                        <div class="tab-pane fade show active" id="logs-pane" role="tabpanel">
+                            <div class="hacker-text-content" style="font-family: 'Fira Code'; color: #ccc; font-size: 0.9rem; max-height: 60vh; overflow-y: auto; padding-right: 10px;">
+                                <p class="text-neon mb-3">> DECRYPTING_DOCUMENTATION...</p>
+                                
+                                <h5 class="text-white border-bottom border-secondary pb-1 mb-2">1. PROJECT ABSTRACT</h5>
+                                <p>
+                                    The Automated Medicine Dispenser is an IoT-based system designed to assist elderly patients with medication adherence. It automates the pill dispensing process at scheduled intervals to prevent dosage misses.
+                                </p>
+                                
+                                <h5 class="text-white border-bottom border-secondary pb-1 mb-2 mt-4">2. HARDWARE SPECIFICATIONS</h5>
+                                <ul class="list-unstyled">
+                                    <li><span class="text-neon">></span> <strong>Microcontroller:</strong> Arduino Uno / Nano</li>
+                                    <li><span class="text-neon">></span> <strong>RTC Module:</strong> DS3231 (Real Time Clock)</li>
+                                    <li><span class="text-neon">></span> <strong>Actuator:</strong> Servo Motor (MG996R)</li>
+                                    <li><span class="text-neon">></span> <strong>Display:</strong> LCD 16x2 I2C</li>
+                                    <li><span class="text-neon">></span> <strong>Alert System:</strong> Piezo Buzzer & LED Indicators</li>
+                                </ul>
+                                
+                                <h5 class="text-white border-bottom border-secondary pb-1 mb-2 mt-4">3. WORKING PRINCIPLE</h5>
+                                <p>
+                                    The system initializes by reading the current time from the RTC module. The microcontroller compares this real-time data with the pre-defined medication schedule arrays. 
+                                    <br><br>
+                                    When a match occurs (Alarm Condition), the Servo Motor rotates to a calculated angle (e.g., 45 degrees) to open the specific pill compartment. Simultaneously, the buzzer sounds an alert, and the LCD displays the medicine name.
+                                </p>
+
+                                <h5 class="text-white border-bottom border-secondary pb-1 mb-2 mt-4">4. CONCLUSION & FUTURE SCOPE</h5>
+                                <p>
+                                    This prototype successfully demonstrates a low-cost, effective solution for healthcare automation. Future iterations could include GSM modules for SMS alerts to caregivers or cloud integration for remote monitoring.
+                                </p>
+
+                                <p class="text-neon mt-4 blinking">_END_OF_LOG</p>
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="visuals-pane" role="tabpanel">
+                            <div id="projectCarousel" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-inner border border-success">
+                                    <div class="carousel-item active">
+                                        <div class="cyber-image-container">
+                                            <img src="./assets/medbox1.jpg" class="d-block w-100" alt="Circuit Diagram">
+                                            <div class="img-caption">FIG_01: CIRCUIT_DIAGRAM</div>
+                                        </div>
+                                    </div>
+                                    <div class="carousel-item">
+                                        <div class="cyber-image-container">
+                                            <img src="./assets/medbox2.jpg" class="d-block w-100" alt="Prototype">
+                                            <div class="img-caption">FIG_02: PROTOTYPE_BUILD</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#projectCarousel" data-bs-slide="prev">
+                                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                </button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#projectCarousel" data-bs-slide="next">
+                                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="modal-footer border-top border-success">
+                    <button type="button" class="btn btn-sm btn-outline-danger" data-bs-dismiss="modal">CLOSE_CONNECTION</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <audio id="audio-hover" src="https://assets.codepen.io/217233/hover_tone.mp3"></audio>
+    <audio id="audio-click" src="https://assets.codepen.io/217233/click_tone.mp3"></audio>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        const canvas = document.getElementById('matrixCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+
+        const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        const fontSize = 14;
+        let columns = canvas.width / fontSize;
+        let drops = [];
+        for (let x = 0; x < columns; x++) { drops[x] = 1; }
+
+        function draw() {
+            ctx.fillStyle = 'rgba(0, 10, 0, 0.05)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            const neonColor = getComputedStyle(document.documentElement).getPropertyValue('--neon-main').trim();
+            ctx.fillStyle = neonColor; 
+            ctx.font = fontSize + 'px monospace';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = chars.charAt(Math.floor(Math.random() * chars.length));
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+        setInterval(draw, 33);
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            columns = canvas.width / fontSize;
+            drops = [];
+            for (let x = 0; x < columns; x++) { drops[x] = 1; }
+        });
+
+        function reveal() {
+            var reveals = document.querySelectorAll(".reveal");
+            for (var i = 0; i < reveals.length; i++) {
+                var windowHeight = window.innerHeight;
+                var elementTop = reveals[i].getBoundingClientRect().top;
+                var elementVisible = 150;
+                if (elementTop < windowHeight - elementVisible) {
+                    reveals[i].classList.add("active");
+                }
+            }
+        }
+        window.addEventListener("scroll", reveal);
+        reveal();
+
+        window.addEventListener('load', () => {
+            const bar = document.getElementById('progress');
+            const text = document.querySelector('.loader-text');
+            const preloader = document.getElementById('preloader');
+
+            let width = 1;
+            const interval = setInterval(() => {
+                if (width >= 100) {
+                    clearInterval(interval);
+                    text.innerText = "ACCESS GRANTED";
+                    setTimeout(() => {
+                        preloader.style.opacity = '0';
+                        setTimeout(() => preloader.style.display = 'none', 500);
+                    }, 500);
+                } else {
+                    width++;
+                    bar.style.width = width + '%';
+                    if(Math.random() > 0.8) width += 5; 
+                }
+            }, 20);
+        });
+
+        function setTheme(color) {
+            document.documentElement.style.setProperty('--neon-main', color);
+        }
+        
+        setInterval(() => {
+            document.getElementById('cpu-val').innerText = Math.floor(Math.random() * 30) + 10;
+            document.getElementById('ram-val').innerText = 400 + Math.floor(Math.random() * 50);
+        }, 2000);
+
+        const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        const hackerTexts = document.querySelectorAll(".hacker-text");
+
+        hackerTexts.forEach(element => {
+            element.onmouseover = event => {
+                let iterations = 0;
+                const interval = setInterval(() => {
+                    event.target.innerText = event.target.innerText
+                        .split("")
+                        .map((letter, index) => {
+                            if(index < iterations) {
+                                return event.target.dataset.value[index];
+                            }
+                            return letters[Math.floor(Math.random() * 36)];
+                        })
+                        .join("");
+                    
+                    if(iterations >= event.target.dataset.value.length){ 
+                        clearInterval(interval);
+                    }
+                    
+                    iterations += 1 / 3;
+                }, 30);
+            }
+        });
+
+        const terminalInput = document.querySelector('.terminal-input');
+        const systemStatus = document.querySelector('.mt-3.text-neon.small');
+
+        terminalInput.addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                const command = this.value.toLowerCase().trim();
+                this.value = '';
+
+                switch(command) {
+                    case 'help':
+                         updateStatus("CMDS: date, whoami,sudo,clear,contact [HIDDEN (⁠๑⁠•⁠﹏⁠•⁠)]: spin, crash, admin");
+                        break;
+                    case 'date':
+                        updateStatus("CURRENT_TIME: " + new Date().toLocaleString());
+                        break;
+                    case 'whoami':
+                        updateStatus("USER: GUEST_ACCESS_LEVEL_1");
+                        break;
+                    case 'sudo':
+                        updateStatus("ACCESS_DENIED. ADMIN PRIVILEGES REQUIRED.");
+                        break;
+                    case 'clear':
+                        updateStatus("SYSTEM STATUS: ONLINE <br> © 2026 VEDANTH");
+                        break;
+                    case 'contact':
+                        window.location.href = "mailto:s.m.vedanth14@gmail.com";
+                        updateStatus("OPENING_MAIL_CLIENT...");
+                        break;
+                    default:
+                        updateStatus(`COMMAND '${command}' NOT RECOGNIZED.`);
+                }
+            }
+        });
+
+        function updateStatus(text) {
+            systemStatus.innerHTML = text;
+            systemStatus.style.opacity = '0';
+            setTimeout(() => systemStatus.style.opacity = '1', 100);
+        }
+
+        const buttons = document.querySelectorAll('button, a, .nav-link');
+        const hoverSound = document.getElementById('audio-hover');
+        const clickSound = document.getElementById('audio-click');
+
+        if(hoverSound && clickSound) {
+            hoverSound.volume = 0.2;
+            clickSound.volume = 0.3;
+
+            buttons.forEach(btn => {
+                btn.addEventListener('mouseenter', () => {
+                    hoverSound.currentTime = 0;
+                    hoverSound.play().catch(e => {});
+                });
+                
+                btn.addEventListener('click', () => {
+                    clickSound.currentTime = 0;
+                    clickSound.play().catch(e => {});
+                });
+            });
+        }
+
+        let inputBuffer = [];
+        const secrets = {
+            "admin": "godmode",
+            "crash": "bsod",
+            "spin":  "barrel"
+        };
+
+        document.addEventListener('keydown', (e) => {
+            inputBuffer.push(e.key.toLowerCase());
+            if (inputBuffer.length > 10) inputBuffer.shift();
+            const currentString = inputBuffer.join("");
+
+            if (currentString.includes("admin")) {
+                activateGodMode();
+                inputBuffer = []; 
+            }
+            else if (currentString.includes("crash")) {
+                const bsod = document.getElementById('bsod');
+                if(bsod) bsod.style.display = 'block';
+                inputBuffer = [];
+            }
+            else if (currentString.includes("spin")) {
+                document.body.classList.add('barrel-roll');
+                setTimeout(() => document.body.classList.remove('barrel-roll'), 2000);
+                inputBuffer = [];
+            }
+        });
+
+        function activateGodMode() {
+            alert("⚠ SYSTEM OVERRIDE: GOD MODE ⚠");
+            document.body.style.filter = "invert(1) hue-rotate(180deg)";
+            setTimeout(() => document.body.style.filter = "none", 3000);
+        }
+console.log(
+    "%c SYSTEM WARNING: Unstable Architecture Detected.", 
+    "color: #ff0055; font-size: 16px; font-weight: bold;"
+);
+console.log(
+    "%cIf you type 'crash' the system will fail. \nIf you type 'admin' you will trigger an override. \nProceed with caution.", 
+    "color: #0aff00; font-family: monospace;"
+);
+
+    </script>
+</body>
+</html>
